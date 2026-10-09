@@ -19,7 +19,9 @@ class AlienContact(BaseModel):
     signal_strength: float = Field(ge=0.0, le=10.0)
     duration_minutes: int = Field(ge=1, le=1440)
     witness_count: int = Field(ge=1, le=100)
-    message_received: Optional[str | None] = Field(max_length=500, default=None)
+    message_received: Optional[str | None] = Field(
+        max_length=500, default=None
+        )
     is_verified: bool = Field(default=False)
 
     @model_validator(mode="after")
@@ -28,11 +30,19 @@ class AlienContact(BaseModel):
         if not self.contact_id.startswith("AC"):
             raise ValueError("Contact id must start with AC (Alien Contact)")
 
-        if self.contact_type is ContactType.PHYSICAL and self.is_verified is False:
+        if (
+            self.contact_type is ContactType.PHYSICAL
+            and self.is_verified is False
+        ):
             raise ValueError("Physical contact reports must be verified")
 
-        if self.contact_type is ContactType.TELEPATHIC and self.witness_count < 3:
-            raise ValueError("Telepathic contact requires at least 3 witnesses")
+        if (
+            self.contact_type is ContactType.TELEPATHIC
+            and self.witness_count < 3
+        ):
+            raise ValueError(
+                "Telepathic contact requires at least 3 witnesses"
+                )
 
         if self.signal_strength > 7.0 and self.message_received is None:
             raise ValueError("Strong signals should include received messages")

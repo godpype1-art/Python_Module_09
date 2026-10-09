@@ -1,6 +1,6 @@
-from pydantic import (BaseModel, ValidationError, Field )
+from pydantic import (BaseModel, ValidationError, Field)
 from datetime import datetime
-from typing import Optional 
+from typing import Optional
 
 
 class SpaceStation(BaseModel):

@@ -1,6 +1,6 @@
 from pydantic import (BaseModel, ValidationError, Field, model_validator)
 from datetime import datetime
-from typing_extensions import Optional, Self
+from typing_extensions import Self
 from enum import Enum
 
 
@@ -38,14 +38,23 @@ class SpaceMission(BaseModel):
         if not self.mission_id.startswith("M"):
             raise ValueError("Mission ID must start with 'M'")
 
-        if not any(member.rank in {Rank.COMMANDER, Rank.CAPTAIN} for member in self.crew):
-            raise ValueError("Any mission must contain at least one Commander or Captain")
+        if (
+            not any(member.rank in {Rank.COMMANDER, Rank.CAPTAIN}
+                    for member in self.crew)
+        ):
+            raise ValueError(
+                "Any mission must contain at least one Commander or Captain"
+                )
 
-        if self.duration_days > 365 and sum(1 for member in self.crew if member.years_experience >= 5) < (len(self.crew)/2):
-            raise ValueError("Long missions need 50\% expericend crew")
+        if (
+            self.duration_days > 365 and
+            sum(1 for member in self.crew if member.years_experience >= 5)
+            < (len(self.crew)/2)
+        ):
+            raise ValueError("Long missions need 50% experienced crew")
 
         if not all(member.is_active for member in self.crew):
-            raise ValueError("All crew members must be active")        
+            raise ValueError("All crew members must be active")
         return self
 
 
@@ -80,7 +89,7 @@ def main() -> None:
             specialization="Engeneering",
             years_experience=4,
             is_active=True
-        ),
+        )
     ]
 
     space_mission = SpaceMission(
@@ -89,33 +98,75 @@ def main() -> None:
         destination="Mars",
         launch_date="2024-09-16 23:22",
         duration_days=900,
-        crew= l_crew,
+        crew=l_crew,
         mission_status="planned",
         budget_millions=2500.0
         )
 
     print("Valid mission created:")
-    print(f"ID: {space_mission.contact_id}")
-    print(f"Type: {space_mission.contact_type}")
-    print(f"Location: {space_mission.location}")
-    print(f"Signal: {space_mission.signal_strength}/10")
-    print(f"Duration: {space_mission.duration_minutes} minutes")
-    print(f"Witnesses: {space_mission.witness_count}")
-    print(f"Message: {space_mission.message_received}")
+    print(f"Mission: {space_mission.mission_name}")
+    print(f"ID: {space_mission.mission_id}")
+    print(f"Destination: {space_mission.destination}")
+    print(f"Duration: {space_mission.duration_days} days")
+    print(f"Budget: ${space_mission.budget_millions}M")
+    print(f"Crew size: {len(space_mission.crew)}")
+    print("Crew members:")
+    for member in space_mission.crew:
+        print(
+            f"- {member.name} ({member.rank.value}) - {member.specialization}"
+        )
+
     print()
     print("=================================")
     print("Expected validation error:")
     try:
-        space_mission = AlienContact(
-            contact_id="AC-8080",
-            timestamp="2026-09-16 23:22",
-            location="Area 51, Nevada",
-            contact_type=ContactType.TELEPATHIC,
-            signal_strength=8.5,
-            duration_minutes="45",
-            witness_count=1,
-            message_received="Greetings from Zeta Reticuli",
-            is_verified=True
+        l_crew = [
+            CrewMember(
+                member_id="M001",
+                name="Sarah Connor",
+                rank=Rank.COMMANDER,
+                age="27",
+                specialization="Mission Comand",
+                years_experience=6,
+                is_active=True
+            ),
+            CrewMember(
+                member_id="M002",
+                name="John Smith",
+                rank=Rank.LIEUTENANT,
+                age="25",
+                specialization="Navigation",
+                years_experience=4,
+                is_active=True
+            ),
+            CrewMember(
+                member_id="M003",
+                name="Alice Johnson",
+                rank=Rank.OFFICER,
+                age="24",
+                specialization="Engeneering",
+                years_experience=4,
+                is_active=True
+            ),
+            CrewMember(
+                member_id="M003",
+                name="Adin Mob",
+                rank=Rank.OFFICER,
+                age="24",
+                specialization="Engeneering",
+                years_experience=4,
+                is_active=True
+            )
+        ]
+        space_mission = SpaceMission(
+            mission_id="M2024_MARS",
+            mission_name="Mars Colony Establishment",
+            destination="Mars",
+            launch_date="2024-09-16 23:22",
+            duration_days=900,
+            crew=l_crew,
+            mission_status="planned",
+            budget_millions=2500.0
             )
     except ValidationError as e:
         for error in e.errors():
